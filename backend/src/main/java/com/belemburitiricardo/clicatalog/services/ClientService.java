@@ -5,12 +5,15 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.belemburitiricardo.clicatalog.dto.ClientDTO;
 import com.belemburitiricardo.clicatalog.entity.Client;
 import com.belemburitiricardo.clicatalog.repositories.ClientRepository;
+import com.belemburitiricardo.clicatalog.services.exception.DataBaseException;
 import com.belemburitiricardo.clicatalog.services.exception.ResourceNotFoundException;
 
 @Service
@@ -62,6 +65,18 @@ public class ClientService {
 			throw new ResourceNotFoundException("Id no found " + id);
 		}
 		//return null;
+	}
+
+	public void delete(Long id) {
+		try {
+			repository.deleteById(id);
+			}catch(EmptyResultDataAccessException e){
+				throw new ResourceNotFoundException("Id not found " + id);
+			}
+			catch(DataIntegrityViolationException di) {
+				throw new DataBaseException("Integrity violation ");
+			}
+		
 	}
 	
 }
