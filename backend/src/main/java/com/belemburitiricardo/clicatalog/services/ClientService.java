@@ -4,8 +4,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import javax.persistence.EntityNotFoundException;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.belemburitiricardo.clicatalog.dto.ClientDTO;
 import com.belemburitiricardo.clicatalog.entity.Client;
 import com.belemburitiricardo.clicatalog.repositories.ClientRepository;
+import com.belemburitiricardo.clicatalog.services.exception.ResourceNotFoundException;
 
 @Service
 public class ClientService {
@@ -32,7 +31,7 @@ public class ClientService {
 	@Transactional(readOnly = true)
 	public ClientDTO findById(Long id) {
 		Optional<Client> obj = repository.findById(id);
-		Client entity = obj.orElseThrow(() -> new EntityNotFoundException("Entity not found"));
+		Client entity = obj.orElseThrow(() -> new ResourceNotFoundException("Entity not found"));
 		return new ClientDTO(entity);
 	}
 
@@ -47,6 +46,22 @@ public class ClientService {
 		
 		return new ClientDTO(entity);
 		
+	}
+	
+	@Transactional
+	public ClientDTO update(Long id, ClientDTO dto) {
+
+		try {
+		Client entity = repository.getOne(id);//não toca no banco, só instacia provisorio, e só qdo salva ele mexe no banco
+		entity.setName(dto.getName());
+
+		entity= repository.save(entity);
+
+		return new ClientDTO(entity);
+		}catch(ResourceNotFoundException e) {
+			throw new ResourceNotFoundException("Id no found " + id);
+		}
+		//return null;
 	}
 	
 }
